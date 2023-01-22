@@ -1,9 +1,16 @@
 describe('Hacker Stories', () => {
   beforeEach(() => {
-    cy.visit('/')
+    cy.intercept({
+      method: 'GET',
+      pathname: '**/search',
+      query: {
+        query: 'React',
+        page: '0'
+      }
+    }).as('getStories')
 
-    cy.assertLoadingIsShownAndHidden()
-    cy.contains('More').should('be.visible')
+    cy.visit('/')
+    cy.wait('@getStories')
   })
 
   it('shows the footer', () => {
@@ -18,14 +25,22 @@ describe('Hacker Stories', () => {
     // and so, how can I assert on the data?
     // This is why this test is being skipped.
     // TODO: Find a way to test it out.
-    it.skip('shows the right data for all rendered stories', () => {})
+    it.skip('shows the right data for all rendered stories', () => { })
 
     it('shows 20 stories, then the next 20 after clicking "More"', () => {
+      cy.intercept({
+        method: 'GET',
+        pathname: '**/search',
+        query: {
+          query: 'React',
+          page: '1'
+        }
+      }).as('getNextStories')
+
       cy.get('.item').should('have.length', 20)
 
       cy.contains('More').click()
-
-      cy.assertLoadingIsShownAndHidden()
+      cy.wait('@getNextStories')
 
       cy.get('.item').should('have.length', 40)
     })
@@ -44,22 +59,22 @@ describe('Hacker Stories', () => {
     // This is why these tests are being skipped.
     // TODO: Find a way to test them out.
     context.skip('Order by', () => {
-      it('orders by title', () => {})
+      it('orders by title', () => { })
 
-      it('orders by author', () => {})
+      it('orders by author', () => { })
 
-      it('orders by comments', () => {})
+      it('orders by comments', () => { })
 
-      it('orders by points', () => {})
+      it('orders by points', () => { })
     })
 
     // Hrm, how would I simulate such errors?
     // Since I still don't know, the tests are being skipped.
     // TODO: Find a way to test them out.
     context.skip('Errors', () => {
-      it('shows "Something went wrong ..." in case of a server error', () => {})
+      it('shows "Something went wrong ..." in case of a server error', () => { })
 
-      it('shows "Something went wrong ..." in case of a network error', () => {})
+      it('shows "Something went wrong ..." in case of a network error', () => { })
     })
   })
 
@@ -68,6 +83,11 @@ describe('Hacker Stories', () => {
     const newTerm = 'Cypress'
 
     beforeEach(() => {
+      cy.intercept({
+        method: 'GET',
+        url: `**/search?query=${newTerm}&page=0`
+      }).as('getNewStories')
+
       cy.get('#search')
         .clear()
     })
@@ -76,7 +96,7 @@ describe('Hacker Stories', () => {
       cy.get('#search')
         .type(`${newTerm}{enter}`)
 
-      cy.assertLoadingIsShownAndHidden()
+      cy.wait('@getNewStories')
 
       cy.get('.item').should('have.length', 20)
       cy.get('.item')
@@ -92,7 +112,7 @@ describe('Hacker Stories', () => {
       cy.contains('Submit')
         .click()
 
-      cy.assertLoadingIsShownAndHidden()
+      cy.wait('@getNewStories')
 
       cy.get('.item').should('have.length', 20)
       cy.get('.item')
@@ -107,13 +127,13 @@ describe('Hacker Stories', () => {
         cy.get('#search')
           .type(`${newTerm}{enter}`)
 
-        cy.assertLoadingIsShownAndHidden()
+        cy.wait('@getNewStories')
 
         cy.get(`button:contains(${initialTerm})`)
           .should('be.visible')
           .click()
 
-        cy.assertLoadingIsShownAndHidden()
+        cy.wait('@getStories')
 
         cy.get('.item').should('have.length', 20)
         cy.get('.item')
@@ -126,13 +146,17 @@ describe('Hacker Stories', () => {
       it('shows a max of 5 buttons for the last searched terms', () => {
         const faker = require('faker')
 
+        cy.intercept({
+          method: 'GET',
+          url: `**/search**`
+        }).as('getRandomStories')
+
         Cypress._.times(6, () => {
           cy.get('#search')
             .clear()
             .type(`${faker.random.word()}{enter}`)
+          cy.wait('@getRandomStories')
         })
-
-        cy.assertLoadingIsShownAndHidden()
 
         cy.get('.last-searches button')
           .should('have.length', 5)
