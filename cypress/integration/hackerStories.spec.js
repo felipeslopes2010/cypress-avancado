@@ -88,7 +88,7 @@ describe('Hacker Stories', () => {
       // TODO: Find a way to test it out.
       it.skip('shows the right data for all rendered stories', () => { })
   
-      it.only('shows one less story after dimissing the first one', () => {
+      it('shows one less story after dimissing the first one', () => {
         cy.get('.button-small')
           .first()
           .click()
