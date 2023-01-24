@@ -146,7 +146,7 @@ describe('Hacker Stories', () => {
           .should('be.visible')
       })
 
-      it.only('types and clicks the submit button', () => {
+      it('types and clicks the submit button', () => {
         cy.get('#search')
           .type(newTerm)
         cy.contains('Submit')
@@ -165,7 +165,8 @@ describe('Hacker Stories', () => {
 
           cy.intercept({
             method: 'GET',
-            url: '**/search**'
+            url: '**/search**',
+            fixture: 'empty'
           }).as('getRandomStories')
 
           Cypress._.times(6, () => {
