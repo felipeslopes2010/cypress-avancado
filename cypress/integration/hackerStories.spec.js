@@ -261,7 +261,7 @@ describe('Hacker Stories', () => {
         cy.get('#search')
           .should('be.visible')
           .type(newTerm)
-          
+
         cy.contains('Submit')
           .should('be.visible')
           .click()
@@ -290,8 +290,11 @@ describe('Hacker Stories', () => {
             cy.wait('@getRandomStories')
           })
 
-          cy.get('.last-searches button')
-            .should('have.length', 5)
+          cy.get('.last-searches')
+            .within(() => {
+              cy.get('button')
+                .should('have.length', 5)
+            })
         })
       })
     })
